@@ -3,9 +3,9 @@ import os
 from setuptools import setup, find_packages
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
-setup(name='alex',
+setup(name='matexplorer',
       version='0.1',
-      description='alloy exploration in materials databases',
+      description='explore materials databases',
       author='Maxwell Dylla',
       license='MIT',
       packages=find_packages(),
