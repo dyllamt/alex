@@ -1,0 +1,13 @@
+Metadata-Version: 1.0
+Name: matexplorer
+Version: 0.1
+Summary: explore materials databases
+Home-page: UNKNOWN
+Author: Maxwell Dylla
+Author-email: UNKNOWN
+License: MIT
+Description: # matexplorer
+        
+        A toolkit for exploring materials databases using workspaces.
+        
+Platform: UNKNOWN

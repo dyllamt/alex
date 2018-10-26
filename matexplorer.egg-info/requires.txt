@@ -1,0 +1,7 @@
+numpy
+pymongo
+pandas
+sklearn
+plotly
+matminer
+pymatgen

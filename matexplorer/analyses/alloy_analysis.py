@@ -1,21 +1,159 @@
-from matexplorer.workspaces.base import MongoFrame
 
-from pymatgen.analysis.defects.generators import VacancyGenerator
-from matminer.featurizers.structure import SiteStatsFingerprint
+from matexplorer.base import Pipe
+from matexplorer.workspaces.retrievers import MPFrame
+from matexplorer.workspaces.local import MongoFrame
 
-from sklearn.decomposition import PCA
 from pandas import DataFrame, concat
 
+from sklearn.decomposition import PCA
+
+from pymatgen.analysis.defects.generators import VacancyGenerator
+from pymatgen.core.structure import Structure
+
+from matminer.featurizers.site import CrystalNNFingerprint
+from matminer.featurizers.structure import SiteStatsFingerprint
+
+import numpy as np
 import plotly.graph_objs as go
 import plotly.offline as py
-import numpy as np
 
 '''
-this module creates workspaces for analyzing local materials databases.
+load structures from materials project to perform alloy analysis. structures
+and their features are stored in a local mongo database
+
+TODO:
+    . what is the best set of structural feature vectors for matching?
+    . what is the best distance metric for finding similar structures?
 '''
 
+# user variables
+PATH = '/home/mdylla/repos/code/orbital_phase_diagrams/local_db'
+DATABASE = 'orbital_phase_diagrams'
+COLLECTION = 'structure'
+API_KEY = 'VerGNDXO3Wdt4cJb'
 
-class AlloyAnalysis(MongoFrame):
+FRAMEWORK_FEAT = SiteStatsFingerprint(
+    site_featurizer=CrystalNNFingerprint.from_preset(
+        preset="ops", distance_cutoffs=None, x_diff_weight=0.0,
+        porous_adjustment=False),
+    stats=['mean', 'std_dev', 'maximum', 'minimum'])
+
+
+class GenerateMPStructureSpace(Pipe):
+    '''
+    pipeline for generating a structure space on your local machine
+    '''
+    def __init__(self, path, database, collection, api_key=None):
+        '''
+        Args:
+            path (str) path to a mongodb directory
+            database (str) name of a pymongo database
+            collection (str) name of a pymongo collection
+            api_key (str) materials project api key
+        '''
+        self.source = MPFrame(api_key=api_key)
+        self.destination = MongoFrame(path=path, database=database,
+                                      collection=collection)
+
+    def update_mp_ids(self):
+        '''
+        update the collection of mp ids in the local database
+        '''
+        self.source.from_storage(criteria={'structure': {'$exists': True}},
+                                 properties=['material_id'],
+                                 index_mpid=False)
+        self.transfer(to='destination')
+        self.destination.to_storage(identifier='material_id', upsert=True)
+
+    def update_structures(self, batch_size=500):
+        '''
+        update the collection of structures in the local database. updates are
+        done in batches to accomadate the api limits of the materials project
+
+        Args:
+            batch_size (int) limit on number of structures retrieved at a time
+        '''
+
+        collection_count = 0
+        while True:
+
+            # load material ids without structure to memory
+            self.destination.from_storage(find={'filter':
+                                                {'structure':
+                                                 {'$exists': False}},
+                                                'projection':
+                                                {'material_id': 1},
+                                                'limit': batch_size})
+            # end loop if there are no more structures to gather
+            if len(self.destination.memory.index) == 0:
+                break
+            else:
+                mp_ids = list(self.destination.memory['material_id'].values)
+
+            # retrieve materials data from mp database
+            self.source.from_storage(
+                criteria={'material_id': {'$in': mp_ids}},
+                properties=['material_id', 'structure',
+                            'formation_energy_per_atom', 'e_above_hull',
+                            'nsites'],
+                index_mpid=False)
+
+            # save materials data to local storage
+            self.transfer(to='destination')
+            self.destination.to_storage(identifier='material_id', upsert=True)
+
+            # report collection status
+            collection_count += len(mp_ids)
+            print('collected {} structures'.format(collection_count))
+
+    def featurize_structures(self, featurizer=FRAMEWORK_FEAT, batch_size=500):
+        '''
+        featurize structures in the local database in batches
+
+        Args:
+            featurizer (BaseFeaturizer) an instance of a structural featurizer
+            batch_size (int) limit on number of structures retrieved at a time
+        '''
+
+        featurize_count = 0
+        while True:
+
+            # load structures that are not featurized from storage
+            self.destination.from_storage(
+                find={'filter': {'structure': {'$exists': True},
+                      'structure_features': {'$exists': False}},
+                      'projection': {'material_id': 1,
+                                     'structure': 1,
+                                     '_id': 0},
+                      'limit': batch_size})
+            # end loop if there are no more structures to gather
+            if len(self.destination.memory.index) == 0:
+                break
+            else:
+                self.memory['structure'] =\
+                    [Structure.from_dict(struct) for struct in
+                        self.memory['structure']]
+
+            # featurize loaded structures
+            featurizer.featurize_dataframe(self.destination.memory,
+                                           'structure',
+                                           ignore_errors=True,
+                                           pbar=False)
+
+            # store compressed features in permanant storage
+            mp_ids = self.destionation.memory[['material_id']]
+            self.destination.memory.drop(columns=['material_id', 'structure'],
+                                         inplace=True)
+            self.destination.memory_compression('structure_features')
+            self.destination.memory = concat([mp_ids, self.memory], axis=1)
+            self.destination.to_storage(identifier='material_id', upsert=True)
+
+            # report featurization status
+            featurize_count += len(self.destination.memory)
+            print('featurized {} structures'.format(featurize_count))
+
+
+class AnalyzeAlloySpace(MongoFrame):
     '''
     a substitutional alloy space contains structures with the same sites or
     structures related by either a single vacancy or intersticial defect. a
@@ -51,11 +189,7 @@ class AlloyAnalysis(MongoFrame):
         . database (str) name of the database
         . collection (str) name of the collection
         . connection (Collection|None) statefull pymongo connection to storage
-        . dataframe (DataFrame|None) temporary data storage
-
-    TODO:
-    . what is the best set of structural feature vectors for matching?
-    . what is the best distance metric for finding similar structures?
+        . memory (DataFrame|None) temporary data storage
     '''
 
     def __init__(self, path, database, collection):
@@ -66,6 +200,10 @@ class AlloyAnalysis(MongoFrame):
             collection (str) name of a pymongo collection
         '''
         MongoFrame.__init__(self, path, database, collection)
+        self.parent = None
+        self.exemplars = None
+        self.distances = None
+        self.neighborhoods = None
 
     def visulalize_alloy_space(self, parent, threshold=0.1):
         '''
@@ -76,7 +214,7 @@ class AlloyAnalysis(MongoFrame):
         self.exemplars = self.generate_exemplars()
         self.distances = self.generate_distances()
         self.neighborhoods = self.generate_neighborhoods(threshold)
-        self.memory = None  # large ammount of data in temporary storage
+        self.memory = None  # clear large ammount of data in temporary storage
 
         combined_neighborhoods = concat(self.neighborhoods, axis=0)
         pca = PCA(n_components=2, whiten=True)
@@ -166,3 +304,4 @@ class AlloyAnalysis(MongoFrame):
             neighborhoods.append(
                 self.memory.loc[bool_within_threshold])
         return neighborhoods
+

@@ -1,3 +1,4 @@
+from matexplorer.workspaces.base import Workspace
 from subprocess import Popen, DEVNULL
 
 from pandas import DataFrame, concat
@@ -7,88 +8,8 @@ from pymongo import MongoClient
 import numpy as np
 
 '''
-a Workspace contains a connection to an external data source and data saved in
-memory. you can transfer structured data between all workspace sources through
-instance attributes and methods. Pipes can be used to transfer data between
-workspaces through their memory attribute.
+local workspaces are connected to local database structures (currently mongodb)
 '''
-
-
-class Workspace(object):
-    '''
-    workspaces encompass various structured data sources. examples of sources
-    include api retrievers and local databases (mongodb). all workspaces
-    contain a memory attribute for temporary data storage in pandas DataFrames
-
-    Attributes:
-        memory (DataFrame|None) pandas dataframe for temporary storage
-        connection (object) a statefull connection to the data source
-    '''
-    def __init__(self):
-        self.memory = None
-        self.connection = None
-
-    def to_source(self):
-        '''
-        transfer data from memory to source
-        '''
-
-        raise NotImplementedError("to_source() is not defined!")
-
-    def from_source(self):
-        '''
-        transfer data from source to memory
-        '''
-
-        raise NotImplementedError("from_source() is not defined!")
-
-
-class Worker(object):
-    '''
-    a worker will execute a series of operations. an example is loading and
-    featurizing data from the materials project in batches. a worker operates
-    inside a single workspace. he/she can not escape their space!
-    '''
-    def __init__(self, workspace, task):
-        '''
-        Args:
-            workspace (Workspace) instance of a Workspace to execute a task in
-            task (function) a procedural function to execute. this function can
-                have optional arguments set with *args and **kwargs
-        '''
-        self.workspace = workspace
-        self.task = task
-
-    def execute(self, *args, **kwargs):
-        '''
-        execute the task assigned to this worker. optional arguments can be
-        passed into the task by *args and **kwargs
-        '''
-        self.task(*args, **kwargs)
-
-
-class Pipe(object):
-    '''
-    a pipe connects two workspaces through their memory attribute
-
-    Attributes:
-        source (Workspace) instance of the data source
-        destination (Workspace) instance of the data destination
-    '''
-    def __init__(self, source, destination):
-        '''
-        Args:
-            source (Workspace) instance of a data source
-            destination (Workspace) instance of a data destination
-        '''
-        self.source = source
-        self.destination = destination
-
-    def transfer(self):
-        '''
-        transfer data from the source to the destination through memory
-        '''
-        self.destination.memory = self.source.memory
 
 
 def local_connection(func):
@@ -156,7 +77,7 @@ class MongoFrame(Workspace):
         self.collection = collection
 
     @local_connection
-    def save_to_storage(self, identifier, upsert=True):
+    def to_storage(self, identifier, upsert=True):
         '''
         save data in memory (DataFrame) to storage (Collection)
 
@@ -176,7 +97,7 @@ class MongoFrame(Workspace):
                 self.memory.to_dict(orient='records'))
 
     @local_connection
-    def load_to_memory(self, find={}):
+    def from_storage(self, find={}):
         '''
         load data from storage (Collection) to memory (DataFrame)
 
@@ -204,7 +125,7 @@ class MongoFrame(Workspace):
                             'then flag clear_collection as True.'.format(
                                 self.database, self.collection))
 
-    def memory_compression(self, column, decompress=False):
+    def compress_memory(self, column, decompress=False):
         '''
         compress all columns into one parent column or expand a single column
 

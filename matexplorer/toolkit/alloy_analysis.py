@@ -1,5 +1,5 @@
-from alex.workspaces.data_streams import MPStructureSpace
-from alex.workspaces.data_analysis import AlloyAnalysis
+from matexplorer.workspaces.data_streams import MPStructureSpace
+from matexplorer.workspaces.data_analysis import AlloyAnalysis
 
 '''
 this module creates pipelines for exploring alloy systems in materials
@@ -28,20 +28,23 @@ class MPAlloyExplorer(MPStructureSpace, AlloyAnalysis):
 
 
 if __name__ == '__main__':
-    from pymatgen.core.structure import Structure
+    # from pymatgen.core.structure import Structure
 
     # database information
     PATH = '/home/mdylla/repos/code/orbital_phase_diagrams/local_db'
     DATABASE = 'orbital_phase_diagrams'
     COLLECTION = 'structure'
+    API_KEY = 'VerGNDXO3Wdt4cJb'
 
     # initial material id
     INITIAL_ID = 'mp-961652'
 
-    exp = MPAlloyExplorer(path=PATH, database=DATABASE, collection=COLLECTION)
-    exp.load_to_memory(find={'filter': {'material_id': INITIAL_ID},
-                             'projection': {'structure': 1,
-                                            '_id': 0}})
-    parent = Structure.from_dict(exp.memory['structure'][0])
+    exp = MPAlloyExplorer(path=PATH, database=DATABASE, collection=COLLECTION,
+                          api_key=API_KEY)
+    exp.featurize_structures()
+    # exp.load_to_memory(find={'filter': {'material_id': INITIAL_ID},
+    #                          'projection': {'structure': 1,
+    #                                         '_id': 0}})
+    # parent = Structure.from_dict(exp.memory['structure'][0])
 
-    exp.visulalize_alloy_space(parent)
+    # exp.visulalize_alloy_space(parent)
