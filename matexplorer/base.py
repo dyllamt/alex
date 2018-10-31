@@ -43,30 +43,6 @@ class Workspace(object):
         raise NotImplementedError("from_source() is not defined!")
 
 
-class Task(object):
-    '''
-    a worker will execute a series of operations. an example is loading and
-    featurizing data from the materials project in batches. a worker operates
-    inside a single workspace. he/she can not escape their space!
-    '''
-    def __init__(self, workspace, task):
-        '''
-        Args:
-            workspace (Workspace) instance of a Workspace to execute a task in
-            task (function) a procedural function to execute. this function can
-                have optional arguments set with *args and **kwargs
-        '''
-        self.workspace = workspace
-        self.task = task
-
-    def execute(self, *args, **kwargs):
-        '''
-        execute the task assigned to this worker. optional arguments can be
-        passed into the task by *args and **kwargs
-        '''
-        self.task(*args, **kwargs)
-
-
 class Pipe(object):
     '''
     a pipe connects two workspaces through their memory attribute
@@ -97,4 +73,3 @@ class Pipe(object):
             self.source.memory = self.destination.memory
         else:
             raise ValueError('{} is not a valid transfer direction'.format(to))
-
