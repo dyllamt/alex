@@ -1,7 +1,7 @@
 
-from matexplorer.base import Pipe
-from matexplorer.workspaces.retrievers import MPFrame
-from matexplorer.workspaces.local import MongoFrame
+from workspace.base import Pipe
+from workspace.workspaces.materials_api import MPFrame
+from workspace.workspaces.local_db import MongoFrame
 
 from pandas import DataFrame, concat
 
@@ -14,6 +14,7 @@ from matminer.featurizers.site import CrystalNNFingerprint
 from matminer.featurizers.structure import SiteStatsFingerprint
 
 import numpy as np
+
 import plotly.graph_objs as go
 import plotly.offline as py
 
@@ -26,11 +27,6 @@ TODO:
     . what is the best distance metric for finding similar structures?
 '''
 
-# user variables
-PATH = '/home/mdylla/repos/code/orbital_phase_diagrams/local_db'
-DATABASE = 'orbital_phase_diagrams'
-COLLECTION = 'structure'
-API_KEY = 'VerGNDXO3Wdt4cJb'
 
 FRAMEWORK_FEAT = SiteStatsFingerprint(
     site_featurizer=CrystalNNFingerprint.from_preset(

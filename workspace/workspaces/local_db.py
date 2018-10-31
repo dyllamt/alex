@@ -1,14 +1,18 @@
-from matexplorer.workspaces.base import Workspace
+from workspace.base import Workspace
+
 from subprocess import Popen, DEVNULL
 
 from pandas import DataFrame, concat
 from pandas.io.json import json_normalize
+
 from pymongo import MongoClient
 
 import numpy as np
 
 '''
 local workspaces are connected to local database structures (currently mongodb)
+this module implements workspaces that handle structured data in local
+databases. currently, mongodb is supported through the pymongo interface
 '''
 
 
@@ -54,7 +58,8 @@ class MongoFrame(Workspace):
     abstraction for structured data in pymongo Collections (storage) and pandas
     DataFrames (memory). methods support data transfers between storage and
     memory. storage and memory are treated as instance attributes. the index
-    attribute of DataFrames are not stored or preserved in compression
+    attribute of DataFrames are not stored or preserved in compression. you
+    must add the index as a column if you want to store that information!
 
     Attributes:
         path (str) path to a mongodb directory

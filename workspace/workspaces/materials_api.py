@@ -1,9 +1,11 @@
-from matexplorer.workspaces.base import Workspace
+from workspace.base import Workspace
+
 from matminer.data_retrieval.retriev_MP import MPDataRetrieval
 
 '''
-retrieval workspaces are connected to external data sources. current retrieval
-workspaces are wrappers for childeren of the matminer BaseDataRetrieval class
+this module implements workspaces that handle structured data in materials
+database that is serviced by an api. the workspaces are essentially wrappers
+around childeren of the matminer BaseDataRetrieval class
 '''
 
 
@@ -25,8 +27,8 @@ class MPFrame(Workspace, MPDataRetrieval):
 
     def from_storage(self, criteria, properties, index_mpid=False, kwargs):
         '''
-        transfer data from storage to memory. see matminer's get_dataframe
-        method for optional arguments to pass to get_datafraem
+        transfer data from storage to memory. see the matminer MPDataRetrieval
+        class for optional arguments to pass to the get_dataframe method
         '''
 
         self.memory = self.get_dataframe(criteria, properties,
