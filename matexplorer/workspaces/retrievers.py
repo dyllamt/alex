@@ -1,5 +1,6 @@
 from matexplorer.workspaces.base import Workspace
 from matminer.data_retrieval.retriev_MP import MPDataRetrieval
+
 '''
 retrieval workspaces are connected to external data sources. current retrieval
 workspaces are wrappers for childeren of the matminer BaseDataRetrieval class
@@ -20,7 +21,7 @@ class MPFrame(Workspace, MPDataRetrieval):
         transfer data from memory to storage
         '''
 
-        raise NotImplementedError("to_source() is not defined!")
+        raise NotImplementedError("to_storage() is not defined!")
 
     def from_storage(self, criteria, properties, index_mpid=False, kwargs):
         '''

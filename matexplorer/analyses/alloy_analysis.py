@@ -46,7 +46,7 @@ class GenerateMPStructureSpace(Pipe):
     def __init__(self, path, database, collection, api_key=None):
         '''
         Args:
-            path (str) path to a mongodb directory
+            path (str) path to a local mongodb directory
             database (str) name of a pymongo database
             collection (str) name of a pymongo collection
             api_key (str) materials project api key
@@ -54,6 +54,14 @@ class GenerateMPStructureSpace(Pipe):
         self.source = MPFrame(api_key=api_key)
         self.destination = MongoFrame(path=path, database=database,
                                       collection=collection)
+
+    def update_all(self, batch_size=500, featurizer=FRAMEWORK_FEAT):
+        '''
+        convienience function for updating the structure space
+        '''
+        self.update_mp_ids()
+        self.update_structures(batchsize=500)
+        self.featurize_structures(batch_size=batch_size, featurizer=featurizer)
 
     def update_mp_ids(self):
         '''
@@ -106,13 +114,13 @@ class GenerateMPStructureSpace(Pipe):
             collection_count += len(mp_ids)
             print('collected {} structures'.format(collection_count))
 
-    def featurize_structures(self, featurizer=FRAMEWORK_FEAT, batch_size=500):
+    def featurize_structures(self, batch_size=500, featurizer=FRAMEWORK_FEAT):
         '''
         featurize structures in the local database in batches
 
         Args:
-            featurizer (BaseFeaturizer) an instance of a structural featurizer
             batch_size (int) limit on number of structures retrieved at a time
+            featurizer (BaseFeaturizer) an instance of a structural featurizer
         '''
 
         featurize_count = 0
@@ -304,4 +312,3 @@ class AnalyzeAlloySpace(MongoFrame):
             neighborhoods.append(
                 self.memory.loc[bool_within_threshold])
         return neighborhoods
-
