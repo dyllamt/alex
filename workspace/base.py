@@ -6,10 +6,7 @@ this module defines key objects for data exploration:
     a memory attribute for storing data during run-time, but may also have
     connections to other data sources such as APIs or local databases.
 
-2. Task - an object for performing operations within a Workspace. a Task
-    inherits from the Workspace that it operates within.
-
-3. Pipe - an object for passing data between two Workspace instances. data is
+2. Pipe - an object for passing data between two Workspace instances. data is
     transfered using the memory attributes of both Workspaces.
 '''
 
