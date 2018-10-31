@@ -33,14 +33,14 @@ class Workspace(object):
         transfer data from memory to source
         '''
 
-        raise NotImplementedError("to_source() is not defined!")
+        raise NotImplementedError("to_storage() is not defined!")
 
     def from_storage(self):
         '''
         transfer data from source to memory
         '''
 
-        raise NotImplementedError("from_source() is not defined!")
+        raise NotImplementedError("from_storage() is not defined!")
 
 
 class Pipe(object):
