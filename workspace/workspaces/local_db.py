@@ -2,12 +2,9 @@ from workspace.base import Workspace
 
 from subprocess import Popen, DEVNULL
 
-from pandas import DataFrame, concat
-from pandas.io.json import json_normalize
+from pandas import DataFrame
 
 from pymongo import MongoClient
-
-import numpy as np
 
 '''
 this module implements workspaces that handle structured data in local
@@ -128,21 +125,3 @@ class MongoFrame(Workspace):
             raise Exception('Do you mean to delete everything in {}.{}? If so,'
                             'then flag clear_collection as True.'.format(
                                 self.database, self.collection))
-
-    def compress_memory(self, column, decompress=False):
-        '''
-        compress all columns into one parent column or expand a single column
-
-        Args:
-            column (str) data field name to expand or compress into
-            decompress (bool) choose between column compression/decompression
-        '''
-        if decompress:
-            decompressed = json_normalize(
-                self.memory[[column]].to_dict(orient='records'))
-            self.memory.drop(columns=column, inplace=True)
-            self.memory = concat([self.memory, decompressed], axis=1)
-        else:
-            compressed = self.memory.to_dict(orient='records')
-            self.memory = DataFrame(data=np.array(compressed),
-                                    columns=[column])
