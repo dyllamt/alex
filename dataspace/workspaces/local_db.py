@@ -1,4 +1,4 @@
-from workspace.base import Workspace
+from dataspace.base import Workspace
 
 from subprocess import Popen, DEVNULL
 
