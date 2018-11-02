@@ -1,6 +1,6 @@
 from workspace.base import Workspace
 
-from matminer.data_retrieval.retriev_MP import MPDataRetrieval
+from matminer.data_retrieval.retrieve_MP import MPDataRetrieval
 
 '''
 this module implements workspaces that handle structured data in materials
@@ -25,7 +25,7 @@ class MPFrame(Workspace, MPDataRetrieval):
 
         raise NotImplementedError("to_storage() is not defined!")
 
-    def from_storage(self, criteria, properties, index_mpid=False, kwargs):
+    def from_storage(self, criteria, properties, index_mpid=False, **kwargs):
         '''
         transfer data from storage to memory. see the matminer MPDataRetrieval
         class for optional arguments to pass to the get_dataframe method

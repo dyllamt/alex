@@ -1,4 +1,3 @@
-
 from workspace.base import Pipe
 from workspace.workspaces.materials_api import MPFrame
 from workspace.workspaces.local_db import MongoFrame
@@ -134,9 +133,9 @@ class GenerateMPStructureSpace(Pipe):
             if len(self.destination.memory.index) == 0:
                 break
             else:
-                self.memory['structure'] =\
+                self.destination.memory['structure'] =\
                     [Structure.from_dict(struct) for struct in
-                        self.memory['structure']]
+                        self.destination.memory['structure']]
 
             # featurize loaded structures
             featurizer.featurize_dataframe(self.destination.memory,
@@ -145,11 +144,12 @@ class GenerateMPStructureSpace(Pipe):
                                            pbar=False)
 
             # store compressed features in permanant storage
-            mp_ids = self.destionation.memory[['material_id']]
+            mp_ids = self.destination.memory[['material_id']]
             self.destination.memory.drop(columns=['material_id', 'structure'],
                                          inplace=True)
-            self.destination.memory_compression('structure_features')
-            self.destination.memory = concat([mp_ids, self.memory], axis=1)
+            self.destination.compress_memory('structure_features')
+            self.destination.memory = concat([mp_ids, self.destination.memory],
+                                             axis=1)
             self.destination.to_storage(identifier='material_id', upsert=True)
 
             # report featurization status

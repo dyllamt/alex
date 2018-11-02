@@ -10,7 +10,6 @@ from pymongo import MongoClient
 import numpy as np
 
 '''
-local workspaces are connected to local database structures (currently mongodb)
 this module implements workspaces that handle structured data in local
 databases. currently, mongodb is supported through the pymongo interface
 '''
