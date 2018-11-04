@@ -92,3 +92,23 @@ class Pipe(object):
             self.source.memory = self.destination.memory
         else:
             raise ValueError('{} is not a valid transfer direction'.format(to))
+
+
+def in_batches(func):
+    '''
+    perform an operation in batches. the input function must return a bool that
+    indicates whether the batch process is still ongoing
+
+    Args:
+        func (function) a function that processes an operation in batches.
+            this function must return a bool (1 to continue|0 to stop)
+    '''
+
+    def wrapper(self, *args, **kwargs):
+
+        flag = 1
+        while flag is True:
+            flag = func(self, *args, **kwargs)
+
+        return flag
+    return wrapper
