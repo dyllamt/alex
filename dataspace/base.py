@@ -107,7 +107,7 @@ def in_batches(func):
     def wrapper(self, *args, **kwargs):
 
         flag = 1
-        while flag is True:
+        while flag == 1:
             flag = func(self, *args, **kwargs)
 
         return flag
