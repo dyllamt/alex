@@ -1,3 +1,5 @@
+import unittest
+
 from unittest import TestCase
 from pandas.util.testing import assert_frame_equal
 
@@ -107,8 +109,5 @@ class TestInBatches(TestCase):
         self.assertFalse(self.initial_list)
 
 
-
 if __name__ == '__main__':
-    test = TestInBatches()
-    test.setUp()
-    test.test_in_batches()
+    unittest.main()
