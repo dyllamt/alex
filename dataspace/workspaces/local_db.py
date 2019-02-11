@@ -58,14 +58,14 @@ class MongoFrame(Workspace):
     must add the index as a column if you want to store that information!
 
     Attributes:
-        path (str) path to a mongodb directory
-        database (str) name of a pymongo database
         collection (str) name of a pymongo collection
+        database (str) name of a pymongo database
+        path (str) path to a mongodb directory
         connection (Collection|None) statefull connection to storage
         memory (DataFrame|None) pandas dataframe for temporary storage
     '''
 
-    def __init__(self, path, database, collection):
+    def __init__(self, collection, database, path='/data/db'):
         '''
         Args:
             path (str) path to a mongodb directory
