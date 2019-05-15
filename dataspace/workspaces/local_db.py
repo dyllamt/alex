@@ -98,12 +98,12 @@ class MongoFrame(Workspace):
                 self.memory.to_dict(orient='records'))
 
     @local_connection
-    def from_storage(self, find={}):
+    def from_storage(self, **find):
         '''
         load data from storage (Collection) to memory (DataFrame)
 
         args:
-            find (dict) optional arguments to pass to pymongo.find
+            **find (dict) optional arguments to pass to pymongo.find
         '''
         self.memory = DataFrame.from_records(
             list(self.connection.find(**find)))
