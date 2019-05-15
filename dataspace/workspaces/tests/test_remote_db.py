@@ -3,12 +3,13 @@ import numpy as np
 
 from os import mkdir
 from shutil import rmtree
+from subprocess import Popen, DEVNULL
 
 from unittest import TestCase
 
 from pandas import DataFrame
 
-from dataspace.workspaces.local_db import MongoFrame, local_connection
+from dataspace.workspaces.remote_db import MongoFrame, remote_connection
 
 
 test_frame = DataFrame(data=np.array([[1, 10, 'one'],
@@ -25,9 +26,13 @@ class MongoFrameTest(TestCase, MongoFrame):
         # create directory for test database
         mkdir('./testdb')
 
+        # start a mongod instance
+        self.mongod = Popen(['mongod', '--dbpath', './testdb'], stdout=DEVNULL)
+
         # make MongoFrame attributes accessible
-        MongoFrame.__init__(self, path='./testdb', database='test',
-                            collection='test')
+        MongoFrame.__init__(self, host='localhost', port=27017,
+                            database='test_db', collection='test_collection',
+                            authSource='admin', username=None, password=None)
 
         # save a copy of the original data
         self.original_data = test_frame
@@ -43,13 +48,13 @@ class MongoFrameTest(TestCase, MongoFrame):
     def test_access_storage(self):
 
         # test for successfull connection
-        @local_connection
+        @remote_connection
         def connection_exists(self):
             self.assertTrue(self.connection)
         connection_exists(self)
 
         # test for connection closure before raising error
-        @local_connection
+        @remote_connection
         def throw_error(self):
             raise Exception
         try:
@@ -115,6 +120,12 @@ class MongoFrameTest(TestCase, MongoFrame):
 
     @classmethod
     def tearDownClass(self):
+
+        # terminate the mongod instance
+        self.mongod.terminate()
+        self.mongod.wait()
+
+        # delete the storage location
         rmtree('./testdb')
 
 
