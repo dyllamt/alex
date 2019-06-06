@@ -1,7 +1,11 @@
-# Construct ETL Operations for Structured Data
+## Agile ETL Prototyping
 
-dataspace standardizes ETL operations by flowing data through pandas `DataFrame` objects. There are two objects that facilitate ETL---`Workspace` objects and `Pipe` objects. Workspaces implement to-storage and from-storage operations, where data at run-time is stored (in memory) in a pandas data-frame. Pipes implement transfer operations and connect various data sources and destinations. These objects are extremely powerful for prototyping data pipelines.
+dataspace standardizes ETL operations for structured data. There are two base objects that facilitate ETL&mdash;`Workspace` objects and `Pipe` objects. Workspaces implement `to_storage` and `from_storage` operations for IO. Pipes implement `transfer` operations between source and destination workspaces, where the data flows through the `memory` attributes of workspaces as a pandas `DataFrame`. These objects are *agile* and powerful for prototyping data pipelines.
 
-There are several workspaces currently implemented in dataspace. Two workspaces interface with mongodb systems and are implemented at the collection level. A separate workspace interfaces with a set of retrieval APIs for open materials databases.
+## Supported Endpoints
 
-You can find a simple example with mongodb in mongodb_example.ipynb. For more examples of how I have integrated dataspace into database building and model construction, visit some of my other repositories.
+There are several workspaces currently implemented in dataspace. Two workspaces interface with mongodb systems and are implemented at the collection level. Another workspace interfaces with retrieval APIs for open materials databases.
+
+## Examples
+
+A simple example demonstrating ETL operations with mongodb is given in mongodb_example.ipynb. For more complex examples of how dataspace can be integrated into database building and machine learning, visit some of my other repositories.
