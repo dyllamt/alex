@@ -1,4 +1,4 @@
-# Construct ETL Operations for Structured Data
+## Construct ETL Operations for Structured Data
 
 dataspace standardizes ETL operations for structured data. There are two objects that facilitate ETL&mdash;`Workspace` objects and `Pipe` objects. Workspaces implement `to_storage` and `from_storage` operations for IO. Pipes implement `transfer` operations between source and destination workspaces, where the data flows through the `memory` attributes of workspaces as a pandas `DataFrame`. These objects are *agile* and powerful for prototyping data pipelines.
 
