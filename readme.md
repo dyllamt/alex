@@ -4,7 +4,7 @@ dataspace standardizes ETL operations for structured data. There are two objects
 
 ## Features
 
-There are several workspaces currently implemented in dataspace. Two workspaces interface with mongodb systems and are implemented at the collection level. Another workspace interfaces with a set of retrieval APIs for open materials databases.
+There are several workspaces currently implemented in dataspace. Two workspaces interface with mongodb systems and are implemented at the collection level. Another workspace interfaces with retrieval APIs for open materials databases.
 
 ## Examples
 
