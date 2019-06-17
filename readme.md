@@ -8,4 +8,4 @@ There are several workspaces currently implemented in dataspace. Two workspaces 
 
 ## Examples
 
-A simple example demonstrating ETL operations with mongodb is given in mongodb_example.ipynb. For more complex examples of how dataspace can be integrated into database building and machine learning, visit some of my other repositories.
+A simple example demonstrating ETL operations with mongodb is given in mongodb_example.ipynb. For more complex examples of how dataspace can be integrated into database building and machine learning, visit some of my other repositories ([matcom](https://github.com/dyllamt/matcom) & [bonding_models](https://github.com/dyllamt/bonding_models).
